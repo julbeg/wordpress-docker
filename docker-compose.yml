@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./wordpress:/var/www/html
+      - ./.docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - wordpress
+
+  wordpress:
+    user: "${UID:-0}:${GID:-0}"
+    build:
+      context: .
+      dockerfile: ./.docker/wordpress.Dockerfile
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./wordpress:/var/www/html
+
+  db:
+    image: mysql:8.0
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 5s
+      retries: 10
+    command: '--default-authentication-plugin=mysql_native_password'
+
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${MYSQL_USERNAME}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+      UPLOAD_LIMIT: 300M
+    volumes:
+      - phpmyadmindata:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+        - '1025:1025'
+        - '8025:8025'
+
+volumes:
+  db_data:
+  phpmyadmindata:
