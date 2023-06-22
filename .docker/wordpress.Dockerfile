@@ -85,3 +85,6 @@ RUN { \
 	} > /usr/local/etc/php/conf.d/error-logging.ini
 
 RUN mv "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini"
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
