@@ -7,6 +7,8 @@ RUN set -eux; \
 		bash \
 # Ghostscript is required for rendering PDF previews
 		ghostscript \
+# Node and npm
+		npm \
 	;
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
