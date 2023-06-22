@@ -12,10 +12,11 @@ services:
       - wordpress
 
   wordpress:
-    user: "${UID:-0}:${GID:-0}"
     build:
       context: .
       dockerfile: ./.docker/wordpress.Dockerfile
+      args:
+        - HOST_UID=${HOST_UID}
     env_file: .env
     depends_on:
       db:

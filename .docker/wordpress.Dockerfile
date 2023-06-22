@@ -88,3 +88,9 @@ RUN mv "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini"
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+# Create user based on provided user ID
+ARG HOST_UID
+RUN adduser --disabled-password --gecos "" --uid $HOST_UID wordpress
+
+USER wordpress
