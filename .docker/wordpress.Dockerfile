@@ -7,6 +7,8 @@ RUN set -eux; \
 		bash \
 # Ghostscript is required for rendering PDF previews
 		ghostscript \
+# Alpine package for "imagemagick" contains ~120 .so files, see: https://github.com/docker-library/wordpress/pull/497
+		imagemagick \
 # Node and npm
 		npm \
 	;
@@ -18,6 +20,7 @@ RUN set -ex; \
 		$PHPIZE_DEPS \
 		freetype-dev \
 		icu-dev \
+		imagemagick-dev \
 		libjpeg-turbo-dev \
 		libpng-dev \
 		libwebp-dev \
@@ -37,6 +40,12 @@ RUN set -ex; \
 		mysqli \
 		zip \
 	; \
+# WARNING: imagick is likely not supported on Alpine: https://github.com/Imagick/imagick/issues/328
+# https://pecl.php.net/package/imagick
+	pecl install imagick-3.6.0; \
+	docker-php-ext-enable imagick; \
+	rm -r /tmp/pear; \
+	\
 # some misbehaving extensions end up outputting to stdout 🙈 (https://github.com/docker-library/wordpress/issues/669#issuecomment-993945967)
 	out="$(php -r 'exit(0);')"; \
 	[ -z "$out" ]; \
@@ -84,10 +93,10 @@ RUN { \
 		echo 'html_errors = Off'; \
 	} > /usr/local/etc/php/conf.d/error-logging.ini
 
-RUN mv "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini"
-
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+RUN mv "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini"
 
 # Create user based on provided user ID
 ARG HOST_UID
