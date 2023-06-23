@@ -68,33 +68,21 @@ RUN set -ex; \
 	err="$(php --version 3>&1 1>&2 2>&3)"; \
 	[ -z "$err" ]
 
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
 RUN set -eux; \
-	docker-php-ext-enable opcache; \
-	{ \
-		echo 'opcache.memory_consumption=128'; \
-		echo 'opcache.interned_strings_buffer=8'; \
-		echo 'opcache.max_accelerated_files=4000'; \
-		echo 'opcache.revalidate_freq=2'; \
-	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
-# https://wordpress.org/support/article/editing-wp-config-php/#configure-error-logging
-RUN { \
-# https://www.php.net/manual/en/errorfunc.constants.php
-# https://github.com/docker-library/wordpress/issues/420#issuecomment-517839670
-		echo 'error_reporting = E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR'; \
-		echo 'display_errors = Off'; \
-		echo 'display_startup_errors = Off'; \
-		echo 'log_errors = On'; \
-		echo 'error_log = /dev/stderr'; \
-		echo 'log_errors_max_len = 1024'; \
-		echo 'ignore_repeated_errors = On'; \
-		echo 'ignore_repeated_source = Off'; \
-		echo 'html_errors = Off'; \
-	} > /usr/local/etc/php/conf.d/error-logging.ini
+	docker-php-ext-enable opcache;
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY ./.docker/wordpress/opcache-recommended.ini /usr/local/etc/php/conf.d/
+
+# https://wordpress.org/support/article/editing-wp-config-php/#configure-error-logging
+COPY ./.docker/wordpress/error-logging.ini /usr/local/etc/php/conf.d/
+
+# Other php settings
+COPY ./.docker/wordpress/default.ini /usr/local/etc/php/conf.d/
 
 RUN mv "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini"
 
