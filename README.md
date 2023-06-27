@@ -2,7 +2,6 @@
 # Wordpress Docker
 A simple docker setup for Wordpress local development with :
 - PHP 8.2
-- Nginx 1.25
 - Mysql 8.0
 - Phpmyadmin
 - Mailpit
