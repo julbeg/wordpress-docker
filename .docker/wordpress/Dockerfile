@@ -25,6 +25,7 @@ RUN set -ex; \
 		libpng-dev \
 		libwebp-dev \
 		libzip-dev \
+		linux-headers \
 	; \
 	\
 	docker-php-ext-configure gd \
@@ -40,6 +41,10 @@ RUN set -ex; \
 		mysqli \
 		zip \
 	; \
+# Install Xdebug
+	pecl install xdebug; \
+	docker-php-ext-enable xdebug; \
+	\
 # WARNING: imagick is likely not supported on Alpine: https://github.com/Imagick/imagick/issues/328
 # https://pecl.php.net/package/imagick
 	pecl install imagick-3.6.0; \
@@ -76,13 +81,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 RUN set -eux; \
 	docker-php-ext-enable opcache;
 
-COPY ./.docker/wordpress/opcache-recommended.ini /usr/local/etc/php/conf.d/
-
-# https://wordpress.org/support/article/editing-wp-config-php/#configure-error-logging
-COPY ./.docker/wordpress/error-logging.ini /usr/local/etc/php/conf.d/
-
-# Other php settings
-COPY ./.docker/wordpress/default.ini /usr/local/etc/php/conf.d/
+# PHP settings
+COPY ./.docker/wordpress/conf.d/ /usr/local/etc/php/conf.d/
 
 RUN mv "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini"
 
