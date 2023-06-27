@@ -1,16 +1,6 @@
 version: '3'
 
 services:
-  nginx:
-    image: nginx:1.25-alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./wordpress:/var/www/html
-      - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - wordpress
-
   wordpress:
     build:
       context: .
@@ -21,8 +11,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "80:8000"
     volumes:
       - ./wordpress:/var/www/html
+    command: ["php", "-S", "0.0.0.0:8000"]
 
   db:
     image: mysql:8.0
