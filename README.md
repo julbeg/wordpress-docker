@@ -2,6 +2,8 @@
 # Wordpress Docker
 A simple docker setup for Wordpress local development with :
 - PHP 8.2
+- Xdebug 3
+- OPcache
 - Mysql 8.0
 - Phpmyadmin
 - Mailpit
